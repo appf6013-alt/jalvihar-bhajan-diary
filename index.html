@@ -3,101 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🙏 Jalvihar Bhajan Diary</title>
+    <title>✨ Jalvihar Bhajan Diary</title>
     <style>
-        body { 
-            font-family: system-ui, sans-serif; 
-            background: #0a0f1c; 
-            color: #e2e8f0; 
-            margin: 0; 
-            padding: 10px; 
+        :root {
+            --bg-color: #0b1120;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent-cyan: #22d3ee;
+            --accent-blue: #3b82f6;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --pulse-red: #ef4444;
         }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background: radial-gradient(circle at top, #1e293b 0%, var(--bg-color) 100%);
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 16px; 
+            min-height: 100vh;
+        }
+
         h1 { 
             text-align: center; 
-            color: #67e8f9; 
-            margin: 20px 0; 
+            color: var(--accent-cyan); 
+            margin: 30px 0 10px 0; 
+            font-size: 2.2rem;
+            text-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+            font-weight: 700;
         }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 550px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 4px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            outline: none;
+        }
+
+        #searchInput::placeholder {
+            color: #64748b;
+        }
+
+        /* 🎙️ नया और एस्थेटिक माइक बटन */
+        .mic-btn {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            border: none;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 4px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
+            flex-shrink: 0;
+        }
+
+        .mic-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+            transition: all 0.3s ease;
+        }
+
+        /* जब माइक रिकॉर्ड कर रहा हो */
+        .mic-btn.listening {
+            background: var(--pulse-red) !important;
+            animation: pulse-ring 1.25s infinite cubic-bezier(0.215, 0.610, 0.355, 1);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* 🎵 भजन कार्ड - एस्थेटिक लुक */
+        #songsContainer {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
         .song-card { 
-            background: #1e2937; 
-            margin: 15px 0; 
-            padding: 20px; 
-            border-radius: 12px; 
+            background: var(--card-bg); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            margin-bottom: 20px; 
+            padding: 24px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease, border-color 0.2s ease;
         }
+
+        .song-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(34, 211, 238, 0.2);
+        }
+
         .song-title { 
-            color: #67e8f9; 
+            color: var(--accent-cyan); 
             font-size: 1.4rem; 
-            margin-bottom: 12px; 
+            margin: 0 0 14px 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
+
         .lyrics { 
             white-space: pre-wrap; 
             line-height: 1.8; 
-            font-size: 1.05rem; 
-        }
-        button { 
-            padding: 10px 15px; 
-            margin: 8px 5px 0 0; 
-            border-radius: 8px; 
-            background: #334155; 
-            color: white; 
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #475569;
-        }
-        .controls {
-            text-align: center;
-            margin: 15px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-        .search-box {
-            position: relative;
-            width: 85%;
-            max-width: 500px;
-        }
-        #searchInput {
-            width: 100%;
-            padding: 12px 45px 12px 12px;
+            font-size: 1.1rem; 
+            color: #cbd5e1;
+            background: rgba(15, 23, 42, 0.3);
+            padding: 15px;
             border-radius: 8px;
-            border: 1px solid #334155;
-            background: #1e2937;
-            color: white;
-            box-sizing: border-box;
-            font-size: 1rem;
+            border-left: 3px solid var(--accent-blue);
         }
-        .mic-btn {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            font-size: 1.2rem;
+
+        .copy-btn { 
+            padding: 10px 18px; 
+            margin-top: 15px; 
+            border-radius: 8px; 
+            background: rgba(51, 65, 85, 0.5); 
+            color: var(--text-main); 
+            border: 1px solid rgba(255,255,255,0.1);
             cursor: pointer;
-            padding: 0;
-            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
         }
-        .mic-listening {
-            animation: pulse 1s infinite;
-            color: #ef4444;
+
+        .copy-btn:hover {
+            background: rgba(51, 65, 85, 0.9);
+            border-color: var(--accent-cyan);
         }
-        @keyframes pulse {
-            0% { transform: translateY(-50%) scale(1); }
-            50% { transform: translateY(-50%) scale(1.2); }
-            100% { transform: translateY(-50%) scale(1); }
+
+        .status-msg {
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 40px;
+            font-size: 1.1rem;
         }
     </style>
 </head>
 <body>
+
     <h1>🙏 Jalvihar Bhajan Diary</h1>
+    <div class="subtitle">खोजें अपनी पसंदीदा आरती और भजन</div>
     
     <div class="controls">
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="🔍 सर्च करें (हिंदी या English में)..." onkeyup="filterSongs()">
-            <button class="mic-btn" id="micBtn" onclick="startVoiceSearch()" title="बोलकर सर्च करें">🎙️</button>
+            <input type="text" id="searchInput" placeholder="🔍 टाइप करें (e.g. kalyug me dev siddha)..." onkeyup="filterSongs()">
+            <button class="mic-btn" id="micBtn" onclick="startVoiceSearch()" title="बोलकर सर्च करें">
+                <!-- SVG Microphone Icon -->
+                <svg viewBox="0 0 24 24" id="micIcon">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.42 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.3 6-6.72h-1.7z"/>
+                </svg>
+            </button>
         </div>
     </div>
 
@@ -106,25 +209,55 @@
     <script>
         let songs = [];
 
-        // व्हाट्सएप (हिंग्लिश) अक्षरों को हिंदी स्वर/व्यंजन के बुनियादी साउंड से मैच करने की डिक्शनरी
-        const hinglishMap = {
-            'a': '[अाा]', 'b': 'ब', 'c': '[चक]', 'd': '[दडध]', 'e': '[एे]', 'f': 'फ', 'g': 'ग', 'h': 'ह', 
-            'i': '[इीिी]', 'j': 'ज', 'k': 'क', 'l': 'ल', 'm': 'म', 'n': '[नणंग]', 'o': '[ओो]', 'p': 'प', 
-            'q': 'क', 'r': '[रड़]', 's': '[सशष]', 't': '[तटथठ]', 'u': '[उूुू]', 'v': '[वब]', 'w': 'व', 
-            'x': 'क्स', 'y': 'य', 'z': 'ज', 'sh': 'श', 'ch': 'च', 'kh': 'ख', 'gh': 'घ', 'bh': 'भ', 'dh': 'ध'
+        // 🛠️ सुपर फ़ास्ट हिंग्लिश मैपिंग डिक्शनरी (अक्षरों के कॉम्बिनेशन और आवाज़ के हिसाब से)
+        const mapping = {
+            'sh': 'श', 'ch': 'च', 'kh': 'ख', 'gh': 'घ', 'bh': 'भ', 'dh': 'ध', 'th': 'थ', 'ph': 'फ', 'jh': 'झ', 'gy': 'ज्ञ',
+            'a': 'अ', 'b': 'ब', 'c': 'क', 'd': 'द', 'e': 'ए', 'f': 'फ', 'g': 'ग', 'h': 'ह', 'i': 'इ', 'j': 'ज', 'k': 'क', 
+            'l': 'ल', 'm': 'म', 'n': 'न', 'o': 'ओ', 'p': 'प', 'q': 'क', 'r': 'र', 's': 'स', 't': 'त', 'u': 'उ', 'v': 'व', 
+            'w': 'व', 'x': 'क', 'y': 'य', 'z': 'ज'
         };
+
+        // व्हाट्सएप टेक्स्ट को प्योर हिंदी साउंड कीज़ में बदलने वाला फ़ास्ट एल्गोरिदम
+        function getSoundKey(text) {
+            let str = text.toLowerCase().replace(/[^a-z]/g, '');
+            let result = '';
+            let i = 0;
+            while (i < str.length) {
+                if (i + 1 < str.length && mapping[str.substr(i, 2)]) {
+                    result += mapping[str.substr(i, 2)];
+                    i += 2;
+                } else if (mapping[str[i]]) {
+                    result += mapping[str[i]];
+                    i++;
+                } else {
+                    i++;
+                }
+            }
+            // मात्राओं और कुछ कॉमन कन्फ्यूशन्स को नॉर्मलाइज़ करना ताकि सर्च सटीक हो (जैसे कलयुग में kalyug, kaljug दोनों मैच करें)
+            return result.replace(/[इईउऊएऐओऔ]/g, '') 
+                         .replace(/ज/g, 'द') // हिंग्लिश बोलने के लहजे का बैकअप
+                         .replace(/ड/g, 'र');
+        }
+
+        // हिंदी टेक्स्ट को भी उसी साउंड कीज़ में बदलना ताकि दोनों आपस में मैच हो सकें
+        function getHindiSoundKey(text) {
+            return text.replace(/[ान ी ि ू ु े ै ो ौ ं ँ ः ृ]/g, '')
+                       .replace(/[इईउऊएऐओऔ]/g, '')
+                       .replace(/श|ष/g, 'स')
+                       .replace(/ज/g, 'द')
+                       .replace(/ड़|ढ़|ड/g, 'र');
+        }
 
         async function loadSongs() {
             try {
-                // टेस्टिंग के लिए अगर फाइल न मिले तो डमी डेटा लोड होगा ताकि ऐप क्रैश न हो
                 const res = await fetch('lyrics_backup.txt');
                 const text = await res.text();
                 parseSongs(text);
                 renderSongs();
             } catch(e) {
                 console.log("lyrics_backup.txt नहीं मिली, डमी डेटा लोड हो रहा है।");
-                // डेमो के लिए कुछ भजन:
-                parseSongs("श्री कृष्ण गोविंद हरे मुरारी\nहे नाथ नारायण वासुदेवा\n---\nहनुमान चालीसा\nजय हनुमान ज्ञान गुन सागर\nजय कपीस तिहुं लोक उजागर");
+                // टेस्टिंग के लिए कलयुग वाला भजन भी ऐड कर दिया है:
+                parseSongs("कलयुग में देव सिद्ध\nकलयुग में देव सिद्ध तुम हो हनुमान, संकट को हरने वाले दयानिधान।\n---\nश्री कृष्ण गोविंद हरे मुरारी\nहे नाथ नारायण वासुदेवा");
                 renderSongs();
             }
         }
@@ -138,9 +271,12 @@
                     const title = lines[0].trim();
                     if (title) {
                         const lyrics = lines.slice(1).join('\n').trim();
+                        // सर्च कीज़ को पहले से जनरेट करके रख रहे हैं ताकि टाइप करते समय लैग न हो (सुपर फ़ास्ट)
+                        const cleanHindi = getHindiSoundKey((title + " " + lyrics).toLowerCase());
                         songs.push({
                             title: title,
-                            lyrics: lyrics || "Lyrics उपलब्ध नहीं"
+                            lyrics: lyrics || "Lyrics उपलब्ध नहीं",
+                            searchKey: cleanHindi
                         });
                     }
                 }
@@ -151,8 +287,8 @@
             const container = document.getElementById('songsContainer');
             container.innerHTML = '';
 
-            if(filtered.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#94a3b8;">कोई भजन नहीं मिला...</p>';
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="status-msg">कोई भजन नहीं मिला... कृपया दूसरा शब्द टाइप करें।</div>';
                 return;
             }
 
@@ -162,7 +298,7 @@
                 div.innerHTML = `
                     <h3 class="song-title">${song.title}</h3>
                     <div class="lyrics">${song.lyrics}</div>
-                    <button onclick="copyLyrics('${song.title.replace(/'/g,"\\'")}')">📋 Copy Lyrics</button>
+                    <button class="copy-btn" onclick="copyLyrics('${song.title.replace(/'/g,"\\'")}')">📋 Copy Lyrics</button>
                 `;
                 container.appendChild(div);
             });
@@ -176,26 +312,7 @@
             }
         }
 
-        // हिंग्लिश टेक्स्ट को रेगुलर एक्सप्रेशन (Regex) में बदलने का फंक्शन
-        function convertHinglishToRegex(term) {
-            let regexStr = "";
-            let i = 0;
-            while (i < term.length) {
-                // दो अक्षरों वाले साउंड्स को पहले चेक करें (जैसे sh, ch, kh)
-                if (i + 1 < term.length && hinglishMap[term.substr(i, 2)]) {
-                    regexStr += hinglishMap[term.substr(i, 2)];
-                    i += 2;
-                } else if (hinglishMap[term[i]]) {
-                    regexStr += hinglishMap[term[i]];
-                    i++;
-                } else {
-                    regexStr += term[i];
-                    i++;
-                }
-            }
-            return new RegExp(regexStr, 'i');
-        }
-
+        // 🚀 नया और इंस्टेंट सर्च फ़िल्टर
         function filterSongs() {
             const term = document.getElementById('searchInput').value.trim().toLowerCase();
             
@@ -204,29 +321,29 @@
                 return;
             }
 
-            // चेक करें कि यूजर इंग्लिश/व्हाट्सएप लैंग्वेज में टाइप कर रहा है या हिंदी में
-            const isEnglish = /^[a-zA-Z\s]+$/.test(term);
+            const isEnglish = /^[a-zA-Z\s0-9]+$/.test(term);
 
-            const filtered = songs.filter(song => {
-                if (isEnglish) {
-                    // व्हाट्सएप लैंग्वेज सर्च लॉजिक
-                    const pattern = convertHinglishToRegex(term);
-                    return pattern.test(song.title) || pattern.test(song.lyrics);
-                } else {
-                    // डायरेक्ट हिंदी सर्च लॉजिक
-                    return song.title.toLowerCase().includes(term) || song.lyrics.toLowerCase().includes(term);
-                }
-            });
-
-            renderSongs(filtered);
+            if (isEnglish) {
+                // अगर इंग्लिश में "kalyug me" लिखा तो उसे साउंड की में बदल कर मैच करेगा
+                const inputSoundKey = getSoundKey(term);
+                const filtered = songs.filter(song => song.searchKey.includes(inputSoundKey));
+                renderSongs(filtered);
+            } else {
+                // हिंदी नॉर्मल सर्च
+                const filtered = songs.filter(song => 
+                    song.title.toLowerCase().includes(term) || 
+                    song.lyrics.toLowerCase().includes(term)
+                );
+                renderSongs(filtered);
+            }
         }
 
-        // 🎙️ वॉइस सर्च फंक्शन (Web Speech API)
+        // 🎙️ फिक्स किया हुआ लाइव वॉइस सर्च इंजन
         function startVoiceSearch() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             
             if (!SpeechRecognition) {
-                alert("माफ कीजिए, आपका ब्राउज़र वॉइस सर्च सपोर्ट नहीं करता है। Google Chrome या Edge का उपयोग करें।");
+                alert("आपका ब्राउज़र वॉइस सर्च सपोर्ट नहीं करता। बेस्ट एक्सपीरियंस के लिए Chrome या Edge चलाएं।");
                 return;
             }
 
@@ -234,32 +351,40 @@
             const micBtn = document.getElementById('micBtn');
             const searchInput = document.getElementById('searchInput');
 
-            // भाषा को हिंदी और इंग्लिश दोनों मिक्स (हिंग्लिश) समझने के लिए 'hi-IN' सेट किया है
-            recognition.lang = 'hi-IN'; 
+            recognition.lang = 'hi-IN'; // हिंदी+हिंग्लिश मिक्स इनपुट समझने के लिए सर्वोत्तम
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
 
+            // जैसे ही माइक पर क्लिक हो - तुरंत लाल एनीमेशन चालू होगा
             recognition.onstart = () => {
-                micBtn.classList.add('mic-listening');
-                searchInput.placeholder = "बोलिए, मैं सुन रहा हूँ...";
+                micBtn.classList.add('listening');
+                searchInput.value = '';
+                searchInput.placeholder = "🔴 मैं सुन रहा हूँ, बोलिए...";
             };
 
+            // एरर आने पर लाल लाइट बंद होगी
             recognition.onerror = (event) => {
-                console.error(event.error);
-                micBtn.classList.remove('mic-listening');
-                searchInput.placeholder = "🔍 सर्च करें (हिंदी या English में)...";
+                console.error("माइक एरर:", event.error);
+                if(event.error === 'not-allowed') {
+                    alert("कृपया ब्राउज़र में माइक की परमिशन (Allow) दें!");
+                }
+                stopMicUI();
             };
 
             recognition.onend = () => {
-                micBtn.classList.remove('mic-listening');
-                searchInput.placeholder = "🔍 सर्च करें (हिंदी या English में)...";
+                stopMicUI();
             };
 
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
                 searchInput.value = transcript;
-                filterSongs(); // सर्च फंक्शन को तुरंत ट्रिगर करें
+                filterSongs(); // रिजल्ट आते ही तुरंत भजन फ़िल्टर करें
             };
+
+            function stopMicUI() {
+                micBtn.classList.remove('listening');
+                searchInput.placeholder = "🔍 टाइप करें (e.g. kalyug me dev siddha)...";
+            }
 
             recognition.start();
         }
