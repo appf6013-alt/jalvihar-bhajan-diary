@@ -1,0 +1,126 @@
+ <!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🙏 Jalvihar Bhajan Diary</title>
+    <style>
+        body { 
+            font-family: system-ui, sans-serif; 
+            background: #0a0f1c; 
+            color: #e2e8f0; 
+            margin: 0; 
+            padding: 10px; 
+        }
+        h1 { 
+            text-align: center; 
+            color: #67e8f9; 
+            margin: 20px 0; 
+        }
+        .song-card { 
+            background: #1e2937; 
+            margin: 15px 0; 
+            padding: 20px; 
+            border-radius: 12px; 
+        }
+        .song-title { 
+            color: #67e8f9; 
+            font-size: 1.4rem; 
+            margin-bottom: 12px; 
+        }
+        .lyrics { 
+            white-space: pre-wrap; 
+            line-height: 1.8; 
+            font-size: 1.05rem; 
+        }
+        button { 
+            padding: 10px 15px; 
+            margin: 8px 5px 0 0; 
+            border-radius: 8px; 
+            background: #334155; 
+            color: white; 
+        }
+        .controls {
+            text-align: center;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🙏 Jalvihar Bhajan Diary</h1>
+    <div class="controls">
+        <input type="text" id="searchInput" placeholder="🔍 सर्च करें..." onkeyup="filterSongs()" style="width:85%; max-width:500px; padding:12px;">
+    </div>
+
+    <div id="songsContainer"></div>
+
+    <script>
+        let songs = [];
+
+        async function loadSongs() {
+            try {
+                const res = await fetch('lyrics_backup.txt');
+                const text = await res.text();
+                parseSongs(text);
+                renderSongs();
+            } catch(e) {
+                alert("lyrics_backup.txt फाइल नहीं मिल रही");
+            }
+        }
+
+        function parseSongs(text) {
+            songs = [];
+            // Improved parsing
+            const blocks = text.split('---');
+            blocks.forEach(block => {
+                const lines = block.trim().split('\n');
+                if (lines.length > 0) {
+                    const title = lines[0].trim();
+                    if (title) {
+                        const lyrics = lines.slice(1).join('\n').trim();
+                        songs.push({
+                            title: title,
+                            lyrics: lyrics || "Lyrics उपलब्ध नहीं"
+                        });
+                    }
+                }
+            });
+        }
+
+        function renderSongs(filtered = songs) {
+            const container = document.getElementById('songsContainer');
+            container.innerHTML = '';
+
+            filtered.forEach(song => {
+                const div = document.createElement('div');
+                div.className = 'song-card';
+                div.innerHTML = `
+                    <h3 class="song-title">${song.title}</h3>
+                    <div class="lyrics">${song.lyrics}</div>
+                    <button onclick="copyLyrics('${song.title.replace(/'/g,"\\'")}')">📋 Copy Lyrics</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function copyLyrics(title) {
+            const song = songs.find(s => s.title === title);
+            if (song) {
+                navigator.clipboard.writeText(song.lyrics);
+                alert("✅ Lyrics Copy हो गया!");
+            }
+        }
+
+        function filterSongs() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = songs.filter(song => 
+                song.title.toLowerCase().includes(term) || 
+                song.lyrics.toLowerCase().includes(term)
+            );
+            renderSongs(filtered);
+        }
+
+        window.onload = loadSongs;
+    </script>
+</body>
+</html>
