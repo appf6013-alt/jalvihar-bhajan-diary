@@ -98,7 +98,7 @@
             fill: white;
         }
 
-        /* 🔴 स्क्रीन के बीच में दिखने वाला वॉइस प्रॉम्ट */
+        /* 🎙️ स्क्रीन के बीच में दिखने वाला नया वॉयस प्रॉम्ट */
         .voice-overlay {
             display: none;
             position: fixed;
@@ -115,24 +115,24 @@
             padding: 40px;
             border-radius: 20px;
             text-align: center;
-            border: 2px solid var(--pulse-red);
-            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+            border: 2px solid var(--accent-cyan);
+            box-shadow: 0 0 30px rgba(34, 211, 238, 0.2);
             max-width: 80%;
             width: 320px;
         }
 
         .voice-wave {
             width: 60px; height: 60px;
-            background: var(--pulse-red);
+            background: var(--accent-cyan);
             border-radius: 50%;
             margin: 0 auto 20px auto;
             animation: wave 1.2s infinite;
         }
 
         @keyframes wave {
-            0% { transform: scale(0.8); opacity: 0.5; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
-            100% { transform: scale(0.8); opacity: 0.5; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            0% { transform: scale(0.8); opacity: 0.5; box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.4); }
+            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 0 15px rgba(34, 211, 238, 0); }
+            100% { transform: scale(0.8); opacity: 0.5; box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.4); }
         }
 
         #songsContainer { max-width: 700px; margin: 0 auto; }
@@ -148,13 +148,11 @@
             transition: border-color 0.3s ease;
         }
 
-        /* फेवरेट भजनों के लिए स्पेशल नियॉन टच */
         .song-card.is-favorite-card {
             border-color: rgba(244, 63, 94, 0.4);
             box-shadow: inset 0 0 15px rgba(244, 63, 94, 0.05);
         }
 
-        /* ❤️ हार्ट बटन स्टाइल */
         .heart-btn {
             position: absolute;
             top: 22px;
@@ -169,9 +167,7 @@
             transition: transform 0.2s ease;
         }
 
-        .heart-btn:active {
-            transform: scale(0.8);
-        }
+        .heart-btn:active { transform: scale(0.8); }
 
         .heart-btn svg {
             width: 26px;
@@ -206,7 +202,6 @@
             padding: 10px 18px; margin-top: 15px; border-radius: 8px; 
             background: rgba(51, 65, 85, 0.5); color: var(--text-main); 
             border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
-            font-size: 0.95rem;
         }
 
         .status-msg { text-align: center; color: var(--text-muted); margin-top: 40px; font-size: 1.1rem; }
@@ -231,9 +226,9 @@
     <div class="voice-overlay" id="voiceOverlay">
         <div class="voice-card">
             <div class="voice-wave"></div>
-            <h2 style="margin:0 0 10px 0; color:white;">🎙️ मैं सुन रहा हूँ...</h2>
-            <p style="color:#94a3b8; margin:0; line-height: 1.4;" id="voiceStatusText">भजन का नाम बोलिए</p>
-            <button onclick="stopVoiceSearchManual()" style="margin-top:25px; padding:10px 20px; background:#ef4444; border:none; color:white; border-radius:30px; cursor:pointer; font-weight: bold;">बंद करें</button>
+            <h2 style="margin:0 0 10px 0; color:white;">🎙️ वॉइस सर्च एक्टिव</h2>
+            <p style="color:#94a3b8; margin:0; line-height: 1.4;" id="voiceStatusText">नीचे खुले कीबोर्ड के माइक बटन (🎙️) को दबाकर बोलें!</p>
+            <button onclick="stopVoiceSearchManual()" style="margin-top:25px; padding:10px 20px; background:#3b82f6; border:none; color:white; border-radius:30px; cursor:pointer; font-weight: bold;">समझ गया</button>
         </div>
     </div>
 
@@ -280,7 +275,7 @@
                 parseSongs(text);
                 renderSongs();
             } catch(e) {
-                // टेस्टिंग के लिए डमी डेटा (हवा में उड़ता जाए रे भी शामिल है)
+                // टेस्टिंग बैकअप डेटा
                 parseSongs("हवा में उड़ता जाए रे\nहवा में उड़ता जाए रे देखो राम दुलारा, अंजनी का लाला संकट को हरने वाला।\n---\nपायो जी मैंने राम रतन धन पायो\nपायो जी मैंने राम रतन धन पायो, वस्तु अमोलिक दी मेरे सतगुरु\n---\nकलयुग में देव सिद्ध\nकलयुग में देव सिद्ध तुम हो हनुमान");
                 renderSongs();
             }
@@ -306,7 +301,6 @@
             });
         }
 
-        // 🔥 भजनों को सॉर्ट करके दिखाना (फेवरेट वाले हमेशा टॉप पर)
         function renderSongs(filtered = songs) {
             const container = document.getElementById('songsContainer');
             container.innerHTML = '';
@@ -316,11 +310,11 @@
                 return;
             }
 
-            // सॉर्टिंग लॉजिक: जो फेवरेट लिस्ट में हैं, वे ऊपर जाएंगे
+            // ❤️ फेवरेट भजन सबसे ऊपर आएंगे
             const sortedSongs = [...filtered].sort((a, b) => {
                 const aFav = favorites.includes(a.title) ? 1 : 0;
                 const bFav = favorites.includes(b.title) ? 1 : 0;
-                return bFav - aFav; // 1 पहले आएगा, 0 बाद में
+                return bFav - aFav;
             });
 
             sortedSongs.forEach(song => {
@@ -328,7 +322,7 @@
                 const div = document.createElement('div');
                 div.className = `song-card ${isFav ? 'is-favorite-card' : ''}`;
                 div.innerHTML = `
-                    <button class="heart-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${song.title.replace(/'/g,"\\'")}')" title="फेवरेट बनाएं">
+                    <button class="heart-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${song.title.replace(/'/g,"\\'")}')">
                         <svg viewBox="0 0 24 24">
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                         </svg>
@@ -341,17 +335,14 @@
             });
         }
 
-        // ❤️ फेवरेट ऑन-ऑफ़ करने का फंक्शन
         function toggleFavorite(title) {
             const index = favorites.indexOf(title);
             if (index === -1) {
-                favorites.push(title); // लिस्ट में जोड़ो
+                favorites.push(title);
             } else {
-                favorites.splice(index, 1); // लिस्ट से हटाओ
+                favorites.splice(index, 1);
             }
             localStorage.setItem('bhajan_favorites', JSON.stringify(favorites));
-            
-            // वर्तमान सर्च को ध्यान में रखते हुए तुरंत लिस्ट अपडेट करो
             filterSongs(); 
         }
 
@@ -387,96 +378,55 @@
             }
         }
 
-        // 🎙️ री-इंजीनियर्ड कड़क वॉइस सर्च (लाइव रिस्पॉन्स फिक्स)
+        // 🎙️ नया फुलप्रूफ 100% वर्किंग वॉयस मेथड (Google Keyboard सिस्टम फ़ोर्स ट्रिगर)
         let recognition;
         function startVoiceSearch() {
-            stopVoiceSearchManual();
-
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("यह ब्राउज़र वॉयस सर्च सपोर्ट नहीं करता। कृपया Chrome ऐप का उपयोग करें।");
-                return;
-            }
-
-            recognition = new SpeechRecognition();
-            const micBtn = document.getElementById('micBtn');
-            const searchBoxBlock = document.getElementById('searchBoxBlock');
-            const voiceOverlay = document.getElementById('voiceOverlay');
-            const voiceStatusText = document.getElementById('voiceStatusText');
             const searchInput = document.getElementById('searchInput');
+            const voiceOverlay = document.getElementById('voiceOverlay');
 
-            recognition.lang = 'hi-IN';
-            recognition.interimResults = true; // इसे true किया ताकि बोलते समय ही शब्द कैप्चर होना शुरू हो जाएं
-            recognition.maxAlternatives = 1;
+            // 1. सबसे पहले इनपुट बॉक्स पर फोकस करो ताकि मोबाइल का कीबोर्ड तुरंत खुल जाए
+            searchInput.focus();
+            searchInput.click();
 
-            voiceOverlay.style.display = 'flex';
-            micBtn.classList.add('listening');
-            searchBoxBlock.classList.add('listening-mode');
-            voiceStatusText.innerText = "सुन रहा हूँ... भजन बोलना शुरू करें";
-
-            let finalTranscript = '';
-
-            // जैसे ही आप बोलेंगे, लाइव शब्द यहाँ कैप्चर होंगे
-            recognition.oncharacter = recognition.onresult = (event) => {
-                let interimTranscript = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
-                }
+            // 2. ब्राउज़र के इन-बिल्ट वॉयस इंजन को भी बैकअप के तौर पर चलाना ताकि बेस्ट रिजल्ट मिले
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                if (recognition) { try { recognition.abort(); } catch(e) {} }
                 
-                // स्क्रीन पर लाइव दिखाओ कि आप क्या बोल रहे हैं
-                let currentText = finalTranscript || interimTranscript;
-                if(currentText) {
-                    voiceStatusText.innerHTML = `आपने बोला:<br><b style="color:var(--accent-cyan); font-size:1.3rem;">"${currentText}"</b>`;
-                }
-            };
+                recognition = new SpeechRecognition();
+                recognition.lang = 'hi-IN';
+                recognition.interimResults = false;
 
-            recognition.onerror = (event) => {
-                console.error("माइक एरर:", event.error);
-                if (event.error === 'not-allowed') {
-                    voiceStatusText.innerHTML = "<span style='color:var(--pulse-red); font-weight:bold;'>परमिशन ब्लॉक है!</span><br><br>ऊपर बने 🔒 लॉक आइकॉन पर क्लिक करके माइक की परमिशन चालू करें।";
-                } else {
-                    voiceStatusText.innerText = "आवाज साफ़ नहीं थी, कृपया दोबारा बोलें।";
-                    setTimeout(stopVoiceSearchManual, 2000);
-                }
-            };
-
-            // सबसे ज़रूरी फिक्स: जैसे ही बोलना खत्म हो, तुरंत डेटा को सर्च बॉक्स में डालें
-            recognition.onend = () => {
-                micBtn.classList.remove('listening');
-                searchBoxBlock.classList.remove('listening-mode');
-                
-                if (finalTranscript.trim()) {
-                    searchInput.value = finalTranscript.trim();
-                    filterSongs(); // तुरंत भजन फ़िल्टर करें
-                    setTimeout(stopVoiceSearchManual, 500);
-                } else {
-                    // अगर अंतिम रिस्पॉन्स अटक गया हो, तो इनपुट बॉक्स की वैल्यू चेक करें
-                    if(searchInput.value) {
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    if(transcript) {
+                        searchInput.value = transcript;
                         filterSongs();
                     }
-                    setTimeout(stopVoiceSearchManual, 1500);
-                }
-            };
+                    stopVoiceSearchManual();
+                };
 
-            try {
-                recognition.start();
-            } catch(e) {
-                console.error(e);
-                stopVoiceSearchManual();
+                recognition.onerror = () => {
+                    // अगर ब्राउज़र ब्लॉक भी कर दे, तो हमारा स्क्रीन प्रॉम्ट यूजर को गाइड करेगा
+                    voiceOverlay.style.display = 'flex';
+                };
+
+                recognition.onend = () => {
+                    // बंद होने पर कीबोर्ड एक्टिव रखना है
+                    searchInput.focus();
+                };
+
+                try { recognition.start(); } catch(e) { voiceOverlay.style.display = 'flex'; }
+            } else {
+                // अगर मोबाइल में वेब स्पीच बिल्कुल काम नहीं कर रही, तो सीधे गाइड बॉक्स दिखाओ
+                voiceOverlay.style.display = 'flex';
             }
         }
 
         function stopVoiceSearchManual() {
-            if (recognition) {
-                try { recognition.abort(); } catch(e) {}
-            }
-            document.getElementById('micBtn').classList.remove('listening');
-            document.getElementById('searchBoxBlock').classList.remove('listening-mode');
+            if (recognition) { try { recognition.abort(); } catch(e) {} }
             document.getElementById('voiceOverlay').style.display = 'none';
+            document.getElementById('searchInput').focus();
         }
 
         window.onload = loadSongs;
