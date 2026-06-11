@@ -13,6 +13,7 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --pulse-red: #ef4444;
+            --heart-color: #f43f5e;
         }
 
         body { 
@@ -97,22 +98,12 @@
             fill: white;
         }
 
-        .mic-btn.listening {
-            background: var(--pulse-red) !important;
-            animation: pulse-ring 1s infinite;
-        }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
+        /* 🔴 स्क्रीन के बीच में दिखने वाला वॉइस प्रॉम्ट */
         .voice-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(11, 17, 32, 0.9);
+            background: rgba(11, 17, 32, 0.95);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -126,6 +117,8 @@
             text-align: center;
             border: 2px solid var(--pulse-red);
             box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+            max-width: 80%;
+            width: 320px;
         }
 
         .voice-wave {
@@ -137,9 +130,9 @@
         }
 
         @keyframes wave {
-            0% { transform: scale(0.8); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0.8); opacity: 0.5; }
+            0% { transform: scale(0.8); opacity: 0.5; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.8); opacity: 0.5; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
         #songsContainer { max-width: 700px; margin: 0 auto; }
@@ -151,9 +144,57 @@
             padding: 24px; 
             border-radius: 16px; 
             border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            transition: border-color 0.3s ease;
         }
 
-        .song-title { color: var(--accent-cyan); font-size: 1.4rem; margin: 0 0 14px 0; font-weight: 600; }
+        /* फेवरेट भजनों के लिए स्पेशल नियॉन टच */
+        .song-card.is-favorite-card {
+            border-color: rgba(244, 63, 94, 0.4);
+            box-shadow: inset 0 0 15px rgba(244, 63, 94, 0.05);
+        }
+
+        /* ❤️ हार्ट बटन स्टाइल */
+        .heart-btn {
+            position: absolute;
+            top: 22px;
+            right: 22px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+
+        .heart-btn:active {
+            transform: scale(0.8);
+        }
+
+        .heart-btn svg {
+            width: 26px;
+            height: 26px;
+            fill: none;
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .heart-btn.active svg {
+            fill: var(--heart-color);
+            stroke: var(--heart-color);
+            filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.6));
+        }
+
+        .song-title { 
+            color: var(--accent-cyan); 
+            font-size: 1.4rem; 
+            margin: 0 0 14px 0; 
+            font-weight: 600; 
+            max-width: 85%;
+        }
 
         .lyrics { 
             white-space: pre-wrap; line-height: 1.8; font-size: 1.1rem; color: #cbd5e1;
@@ -165,6 +206,7 @@
             padding: 10px 18px; margin-top: 15px; border-radius: 8px; 
             background: rgba(51, 65, 85, 0.5); color: var(--text-main); 
             border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+            font-size: 0.95rem;
         }
 
         .status-msg { text-align: center; color: var(--text-muted); margin-top: 40px; font-size: 1.1rem; }
@@ -190,8 +232,8 @@
         <div class="voice-card">
             <div class="voice-wave"></div>
             <h2 style="margin:0 0 10px 0; color:white;">🎙️ मैं सुन रहा हूँ...</h2>
-            <p style="color:#94a3b8; margin:0;" id="voiceStatusText">भजन का नाम बोलिए</p>
-            <button onclick="stopVoiceSearchManual()" style="margin-top:20px; padding:8px 16px; background:#ef4444; border:none; color:white; border-radius:5px; cursor:pointer;">बंद करें</button>
+            <p style="color:#94a3b8; margin:0; line-height: 1.4;" id="voiceStatusText">भजन का नाम बोलिए</p>
+            <button onclick="stopVoiceSearchManual()" style="margin-top:25px; padding:10px 20px; background:#ef4444; border:none; color:white; border-radius:30px; cursor:pointer; font-weight: bold;">बंद करें</button>
         </div>
     </div>
 
@@ -199,8 +241,9 @@
 
     <script>
         let songs = [];
+        let favorites = JSON.parse(localStorage.getItem('bhajan_favorites')) || [];
 
-        // 👑 यूनिवर्सल कैरेक्टर मैपिंग: यह अक्षरों के उच्चारण पर काम करता है, शब्दों पर नहीं!
+        // यूनिवर्सल कैरेक्टर मैपिंग (इंग्लिश टू हिंदी साउंड)
         const charMap = {
             'sh': 'श', 'ch': 'च', 'kh': 'ख', 'gh': 'घ', 'bh': 'भ', 'dh': 'ध', 'th': 'थ', 'ph': 'फ', 'jh': 'झ', 'gy': 'ज्ञ',
             'a': 'अ', 'b': 'ब', 'c': 'क', 'd': 'द', 'e': 'ए', 'f': 'फ', 'g': 'ग', 'h': 'ह', 'i': 'इ', 'j': 'ज', 'k': 'क', 
@@ -208,7 +251,6 @@
             'w': 'व', 'x': 'क', 'y': 'य', 'z': 'ज'
         };
 
-        // इंग्लिश टेक्स्ट (हिंग्लिश) को हिंदी के मूल ध्वनियों में बदलने वाला फंक्शन
         function convertToHindiSyllables(text) {
             let str = text.toLowerCase().replace(/[^a-z]/g, '');
             let converted = '';
@@ -224,20 +266,11 @@
                     i++;
                 }
             }
-            // मात्राओं और कमजोर अक्षरों को हटाना ताकि मैचिंग 100% सटीक हो
-            return converted.replace(/[अाइईउऊएऐओऔािीुूेैोौ ं ँ ः ृ]/g, '')
-                            .replace(/श|ष/g, 'स')
-                            .replace(/ज/g, 'द')
-                            .replace(/ड़|ढ़|ड|थ|ट/g, 'र');
+            return converted.replace(/[अाइईउऊएऐओऔािीुूेैोौ ं ँ ः ृ]/g, '').replace(/श|ष/g, 'स').replace(/ज/g, 'द').replace(/ड़|ढ़|ड|थ|ट/g, 'र');
         }
 
-        // आपके भजनों के हिंदी टेक्स्ट को भी उसी मूल ध्वनि इंडेक्स में बदलना
         function convertHindiToSyllables(text) {
-            return text.replace(/[ान ी ि ू ु े ै ो ौ ं ँ ः ृ]/g, '')
-                       .replace(/[अआइईउऊएऐओऔ]/g, '')
-                       .replace(/श|ष/g, 'स')
-                       .replace(/ज/g, 'द')
-                       .replace(/ड़|ढ़|ड|थ|ट/g, 'र');
+            return text.replace(/[ान ी ि ू ु े ै ो ौ ं ँ ः ृ]/g, '').replace(/[अआइईउऊएऐओऔ]/g, '').replace(/श|ष/g, 'स').replace(/ज/g, 'द').replace(/ड़|ढ़|ड|थ|ट/g, 'र');
         }
 
         async function loadSongs() {
@@ -247,8 +280,8 @@
                 parseSongs(text);
                 renderSongs();
             } catch(e) {
-                // डमी बैकअप डेटा ताकि आप बिना फाइल के भी तुरंत चलाकर देख सकें
-                parseSongs("कलयुग में देव सिद्ध\nकलयुग में देव सिद्ध तुम हो हनुमान\n---\nपायो जी मैंने राम रतन धन पायो\nपायो जी मैंने राम रतन धन पायो, वस्तु अमोलिक दी मेरे सतगुरु");
+                // टेस्टिंग के लिए डमी डेटा (हवा में उड़ता जाए रे भी शामिल है)
+                parseSongs("हवा में उड़ता जाए रे\nहवा में उड़ता जाए रे देखो राम दुलारा, अंजनी का लाला संकट को हरने वाला।\n---\nपायो जी मैंने राम रतन धन पायो\nपायो जी मैंने राम रतन धन पायो, वस्तु अमोलिक दी मेरे सतगुरु\n---\nकलयुग में देव सिद्ध\nकलयुग में देव सिद्ध तुम हो हनुमान");
                 renderSongs();
             }
         }
@@ -262,7 +295,6 @@
                     const title = lines[0].trim();
                     if (title) {
                         const lyrics = lines.slice(1).join('\n').trim();
-                        // भजनों का एक परमानेंट हिडन "साउंड इंडेक्स" बनाना
                         const searchIndex = convertHindiToSyllables((title + " " + lyrics).toLowerCase());
                         songs.push({
                             title: title,
@@ -274,25 +306,53 @@
             });
         }
 
+        // 🔥 भजनों को सॉर्ट करके दिखाना (फेवरेट वाले हमेशा टॉप पर)
         function renderSongs(filtered = songs) {
             const container = document.getElementById('songsContainer');
             container.innerHTML = '';
 
             if (filtered.length === 0) {
-                container.innerHTML = '<div class="status-msg">कोई भजन नहीं मिला... कृपया दूसरा शब्द टाइप करें।</div>';
+                container.innerHTML = '<div class="status-msg">कोई भजन नहीं मिला...</div>';
                 return;
             }
 
-            filtered.forEach(song => {
+            // सॉर्टिंग लॉजिक: जो फेवरेट लिस्ट में हैं, वे ऊपर जाएंगे
+            const sortedSongs = [...filtered].sort((a, b) => {
+                const aFav = favorites.includes(a.title) ? 1 : 0;
+                const bFav = favorites.includes(b.title) ? 1 : 0;
+                return bFav - aFav; // 1 पहले आएगा, 0 बाद में
+            });
+
+            sortedSongs.forEach(song => {
+                const isFav = favorites.includes(song.title);
                 const div = document.createElement('div');
-                div.className = 'song-card';
+                div.className = `song-card ${isFav ? 'is-favorite-card' : ''}`;
                 div.innerHTML = `
+                    <button class="heart-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${song.title.replace(/'/g,"\\'")}')" title="फेवरेट बनाएं">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    </button>
                     <h3 class="song-title">${song.title}</h3>
                     <div class="lyrics">${song.lyrics}</div>
                     <button class="copy-btn" onclick="copyLyrics('${song.title.replace(/'/g,"\\'")}')">📋 Copy Lyrics</button>
                 `;
                 container.appendChild(div);
             });
+        }
+
+        // ❤️ फेवरेट ऑन-ऑफ़ करने का फंक्शन
+        function toggleFavorite(title) {
+            const index = favorites.indexOf(title);
+            if (index === -1) {
+                favorites.push(title); // लिस्ट में जोड़ो
+            } else {
+                favorites.splice(index, 1); // लिस्ट से हटाओ
+            }
+            localStorage.setItem('bhajan_favorites', JSON.stringify(favorites));
+            
+            // वर्तमान सर्च को ध्यान में रखते हुए तुरंत लिस्ट अपडेट करो
+            filterSongs(); 
         }
 
         function copyLyrics(title) {
@@ -303,7 +363,6 @@
             }
         }
 
-        // 🚀 नया यूनिवर्सल सर्च फ़िल्टर (बिना किसी डिक्शनरी लिमिटेशन के)
         function filterSongs() {
             let term = document.getElementById('searchInput').value.trim().toLowerCase();
             
@@ -315,29 +374,22 @@
             const isEnglish = /^[a-zA-Z\s0-9]+$/.test(term);
 
             if (isEnglish) {
-                // इनपुट किए गए हिंग्लिश शब्द को साउंड कोड में बदलें
                 const searchSoundCode = convertToHindiSyllables(term);
-                
                 const filtered = songs.filter(song => {
-                    // डायरेक्ट चेक या साउंड कोड मैच चेक
-                    return song.title.toLowerCase().includes(term) || 
-                           song.searchIndex.includes(searchSoundCode);
+                    return song.title.toLowerCase().includes(term) || song.searchIndex.includes(searchSoundCode);
                 });
                 renderSongs(filtered);
             } else {
-                // प्योर हिंदी सर्च
                 const filtered = songs.filter(song => 
-                    song.title.toLowerCase().includes(term) || 
-                    song.lyrics.toLowerCase().includes(term)
+                    song.title.toLowerCase().includes(term) || song.lyrics.toLowerCase().includes(term)
                 );
                 renderSongs(filtered);
             }
         }
 
-        // 🎙️ गिटहब पेजों के लिए पूरी तरह से री-राइट किया गया वॉयस सर्च
+        // 🎙️ री-इंजीनियर्ड कड़क वॉइस सर्च (लाइव रिस्पॉन्स फिक्स)
         let recognition;
         function startVoiceSearch() {
-            // पुराने प्रॉम्ट्स को साफ़ करना
             stopVoiceSearchManual();
 
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -354,46 +406,66 @@
             const searchInput = document.getElementById('searchInput');
 
             recognition.lang = 'hi-IN';
-            recognition.interimResults = false;
+            recognition.interimResults = true; // इसे true किया ताकि बोलते समय ही शब्द कैप्चर होना शुरू हो जाएं
             recognition.maxAlternatives = 1;
 
-            // गिटहब की पॉलिसी को बाईपास करने के लिए यूजर क्लिक के तुरंत बाद इंटरफ़ेस दिखाना
             voiceOverlay.style.display = 'flex';
             micBtn.classList.add('listening');
             searchBoxBlock.classList.add('listening-mode');
-            voiceStatusText.innerText = "सुन रहा हूँ... भजन का नाम बोलें";
+            voiceStatusText.innerText = "सुन रहा हूँ... भजन बोलना शुरू करें";
 
-            recognition.onstart = () => {
-                console.log("माइक एक्टिवेटेड");
-            };
+            let finalTranscript = '';
 
-            recognition.onerror = (event) => {
-                console.error("माइक की समस्या:", event.error);
-                if (event.error === 'not-allowed') {
-                    voiceStatusText.innerHTML = "<span style='color:#ef4444; font-weight:bold;'>परमिशन ब्लॉक है!</span><br><br>कृपया अपने मोबाइल की सेटिंग्स में जाकर Chrome ऐप को Microphone की अनुमति दें, या ऊपर बने 🔒 लॉक आइकॉन पर क्लिक करें।";
-                } else {
-                    voiceStatusText.innerText = "आवाज साफ़ नहीं थी, कृपया दोबारा बटन दबाकर बोलें।";
-                    setTimeout(stopVoiceSearchManual, 2500);
+            // जैसे ही आप बोलेंगे, लाइव शब्द यहाँ कैप्चर होंगे
+            recognition.oncharacter = recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                
+                // स्क्रीन पर लाइव दिखाओ कि आप क्या बोल रहे हैं
+                let currentText = finalTranscript || interimTranscript;
+                if(currentText) {
+                    voiceStatusText.innerHTML = `आपने बोला:<br><b style="color:var(--accent-cyan); font-size:1.3rem;">"${currentText}"</b>`;
                 }
             };
 
+            recognition.onerror = (event) => {
+                console.error("माइक एरर:", event.error);
+                if (event.error === 'not-allowed') {
+                    voiceStatusText.innerHTML = "<span style='color:var(--pulse-red); font-weight:bold;'>परमिशन ब्लॉक है!</span><br><br>ऊपर बने 🔒 लॉक आइकॉन पर क्लिक करके माइक की परमिशन चालू करें।";
+                } else {
+                    voiceStatusText.innerText = "आवाज साफ़ नहीं थी, कृपया दोबारा बोलें।";
+                    setTimeout(stopVoiceSearchManual, 2000);
+                }
+            };
+
+            // सबसे ज़रूरी फिक्स: जैसे ही बोलना खत्म हो, तुरंत डेटा को सर्च बॉक्स में डालें
             recognition.onend = () => {
                 micBtn.classList.remove('listening');
                 searchBoxBlock.classList.remove('listening-mode');
-            };
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                searchInput.value = transcript;
-                filterSongs(); // तुरंत सर्च शुरू करें
-                voiceStatusText.innerText = "सर्च हो रहा है: " + transcript;
-                setTimeout(stopVoiceSearchManual, 800);
+                
+                if (finalTranscript.trim()) {
+                    searchInput.value = finalTranscript.trim();
+                    filterSongs(); // तुरंत भजन फ़िल्टर करें
+                    setTimeout(stopVoiceSearchManual, 500);
+                } else {
+                    // अगर अंतिम रिस्पॉन्स अटक गया हो, तो इनपुट बॉक्स की वैल्यू चेक करें
+                    if(searchInput.value) {
+                        filterSongs();
+                    }
+                    setTimeout(stopVoiceSearchManual, 1500);
+                }
             };
 
             try {
                 recognition.start();
             } catch(e) {
-                console.error("क्रैश बाईपास:", e);
+                console.error(e);
                 stopVoiceSearchManual();
             }
         }
