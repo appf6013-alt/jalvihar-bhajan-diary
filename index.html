@@ -61,7 +61,6 @@
             transition: all 0.3s ease;
         }
 
-        /* 🎙️ माइक चालू होने पर पूरा सर्च बार लाल चमकेगा */
         .search-box.listening-mode {
             border-color: var(--pulse-red) !important;
             box-shadow: 0 0 25px rgba(239, 68, 68, 0.5) !important;
@@ -109,7 +108,6 @@
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
-        /* 🔴 स्क्रीन के बीच में दिखने वाला वॉइस प्रॉम्ट */
         .voice-overlay {
             display: none;
             position: fixed;
@@ -179,7 +177,7 @@
     
     <div class="controls">
         <div class="search-box" id="searchBoxBlock">
-            <input type="text" id="searchInput" placeholder="🔍 टाइप करें (e.g. kalyug, hanuman, dev)..." oninput="filterSongs()">
+            <input type="text" id="searchInput" placeholder="🔍 टाइप करें (e.g. payo ji, kalyug, ram)..." oninput="filterSongs()">
             <button class="mic-btn" id="micBtn" onclick="startVoiceSearch()" title="बोलकर सर्च करें">
                 <svg viewBox="0 0 24 24">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.42 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.3 6-6.72h-1.7z"/>
@@ -202,19 +200,45 @@
     <script>
         let songs = [];
 
-        // 🎯 100% फिक्स हिंग्लिश टू हिंदी डिक्शनरी (इसे आप और भी बढ़ा सकते हैं)
-        const wordDictionary = {
-            'kalyug': 'कलयुग', 'kaljug': 'कलयुग', 'kaliyug': 'कलयुग',
-            'dev': 'देव', 'deb': 'देव',
-            'siddha': 'सिद्ध', 'siddh': 'सिद्ध',
-            'hanuman': 'हनुमान', 'hanman': 'हनुमान',
-            'shree': 'श्री', 'shri': 'श्री',
-            'krishna': 'कृष्ण', 'krisna': 'कृष्ण', 'kisna': 'कृष्ण',
-            'govind': 'गोविंद', 'gobind': 'गोविंद',
-            'hare': 'हरे', 'sheesh': 'शीश', 'shish': 'शीश',
-            'khadau': 'खड़ाऊँ', 'khadaun': 'खड़ाऊँ',
-            'ram': 'राम', 'bhakt': 'भक्त'
+        // 👑 यूनिवर्सल कैरेक्टर मैपिंग: यह अक्षरों के उच्चारण पर काम करता है, शब्दों पर नहीं!
+        const charMap = {
+            'sh': 'श', 'ch': 'च', 'kh': 'ख', 'gh': 'घ', 'bh': 'भ', 'dh': 'ध', 'th': 'थ', 'ph': 'फ', 'jh': 'झ', 'gy': 'ज्ञ',
+            'a': 'अ', 'b': 'ब', 'c': 'क', 'd': 'द', 'e': 'ए', 'f': 'फ', 'g': 'ग', 'h': 'ह', 'i': 'इ', 'j': 'ज', 'k': 'क', 
+            'l': 'ल', 'm': 'म', 'n': 'न', 'o': 'ओ', 'p': 'प', 'q': 'क', 'r': 'र', 's': 'स', 't': 'त', 'u': 'उ', 'v': 'व', 
+            'w': 'व', 'x': 'क', 'y': 'य', 'z': 'ज'
         };
+
+        // इंग्लिश टेक्स्ट (हिंग्लिश) को हिंदी के मूल ध्वनियों में बदलने वाला फंक्शन
+        function convertToHindiSyllables(text) {
+            let str = text.toLowerCase().replace(/[^a-z]/g, '');
+            let converted = '';
+            let i = 0;
+            while (i < str.length) {
+                if (i + 1 < str.length && charMap[str.substr(i, 2)]) {
+                    converted += charMap[str.substr(i, 2)];
+                    i += 2;
+                } else if (charMap[str[i]]) {
+                    converted += charMap[str[i]];
+                    i++;
+                } else {
+                    i++;
+                }
+            }
+            // मात्राओं और कमजोर अक्षरों को हटाना ताकि मैचिंग 100% सटीक हो
+            return converted.replace(/[अाइईउऊएऐओऔािीुूेैोौ ं ँ ः ृ]/g, '')
+                            .replace(/श|ष/g, 'स')
+                            .replace(/ज/g, 'द')
+                            .replace(/ड़|ढ़|ड|थ|ट/g, 'र');
+        }
+
+        // आपके भजनों के हिंदी टेक्स्ट को भी उसी मूल ध्वनि इंडेक्स में बदलना
+        function convertHindiToSyllables(text) {
+            return text.replace(/[ान ी ि ू ु े ै ो ौ ं ँ ः ृ]/g, '')
+                       .replace(/[अआइईउऊएऐओऔ]/g, '')
+                       .replace(/श|ष/g, 'स')
+                       .replace(/ज/g, 'द')
+                       .replace(/ड़|ढ़|ड|थ|ट/g, 'र');
+        }
 
         async function loadSongs() {
             try {
@@ -223,8 +247,8 @@
                 parseSongs(text);
                 renderSongs();
             } catch(e) {
-                // डमी बैकअप डेटा अगर फ़ाइल लोड न हो
-                parseSongs("कलयुग में देव सिद्ध\nकलयुग में देव सिद्ध तुम हो हनुमान, संकट को हरने वाले दयानिधान।\n---\nश्री कृष्ण गोविंद हरे मुरारी\nहे नाथ नारायण वासुदेवा\n---\nशीश पर खड़ाऊँ अखियों में पानी\nशीश पर खड़ाऊँ, अखियों में पानी, राम भक्त लें चला रे, राम की निशानी ॥");
+                // डमी बैकअप डेटा ताकि आप बिना फाइल के भी तुरंत चलाकर देख सकें
+                parseSongs("कलयुग में देव सिद्ध\nकलयुग में देव सिद्ध तुम हो हनुमान\n---\nपायो जी मैंने राम रतन धन पायो\nपायो जी मैंने राम रतन धन पायो, वस्तु अमोलिक दी मेरे सतगुरु");
                 renderSongs();
             }
         }
@@ -237,9 +261,13 @@
                 if (lines.length > 0) {
                     const title = lines[0].trim();
                     if (title) {
+                        const lyrics = lines.slice(1).join('\n').trim();
+                        // भजनों का एक परमानेंट हिडन "साउंड इंडेक्स" बनाना
+                        const searchIndex = convertHindiToSyllables((title + " " + lyrics).toLowerCase());
                         songs.push({
                             title: title,
-                            lyrics: lines.slice(1).join('\n').trim() || "Lyrics उपलब्ध नहीं"
+                            lyrics: lyrics || "Lyrics उपलब्ध नहीं",
+                            searchIndex: searchIndex
                         });
                     }
                 }
@@ -275,7 +303,7 @@
             }
         }
 
-        // 🚀 नया सुपर-फास्ट सर्च इंजन (हिंदी + डिक्शनरी बेस्ड हिंग्लिश)
+        // 🚀 नया यूनिवर्सल सर्च फ़िल्टर (बिना किसी डिक्शनरी लिमिटेशन के)
         function filterSongs() {
             let term = document.getElementById('searchInput').value.trim().toLowerCase();
             
@@ -284,44 +312,37 @@
                 return;
             }
 
-            // इनपुट के हर शब्द को चेक करें, अगर इंग्लिश वर्ड डिक्शनरी में है तो उसे हिंदी में बदलें
-            let words = term.split(/\s+/);
-            let processedWords = words.map(word => {
-                return wordDictionary[word] || word; 
-            });
+            const isEnglish = /^[a-zA-Z\s0-9]+$/.test(term);
 
-            // बदला हुआ शुद्ध टेक्स्ट (जैसे "kalyug me" बन जाएगा "कलयुग me")
-            let cleanTerm = processedWords.join(' ');
-
-            const filtered = songs.filter(song => {
-                const titleLower = song.title.toLowerCase();
-                const lyricsLower = song.lyrics.toLowerCase();
-
-                // 1. डायरेक्ट मैच चेक करें (चाहे इंग्लिश हो या हिंदी)
-                if (titleLower.includes(term) || lyricsLower.includes(term)) return true;
-
-                // 2. डिक्शनरी से कनवर्टेड हिंदी मैच चेक करें
-                let matchCount = 0;
-                processedWords.forEach(w => {
-                    if (titleLower.includes(w) || lyricsLower.includes(w)) {
-                        matchCount++;
-                    }
+            if (isEnglish) {
+                // इनपुट किए गए हिंग्लिश शब्द को साउंड कोड में बदलें
+                const searchSoundCode = convertToHindiSyllables(term);
+                
+                const filtered = songs.filter(song => {
+                    // डायरेक्ट चेक या साउंड कोड मैच चेक
+                    return song.title.toLowerCase().includes(term) || 
+                           song.searchIndex.includes(searchSoundCode);
                 });
-
-                // अगर सर्च किए गए शब्दों में से मुख्य शब्द मैच हो जाते हैं
-                return matchCount > 0;
-            });
-
-            renderSongs(filtered);
+                renderSongs(filtered);
+            } else {
+                // प्योर हिंदी सर्च
+                const filtered = songs.filter(song => 
+                    song.title.toLowerCase().includes(term) || 
+                    song.lyrics.toLowerCase().includes(term)
+                );
+                renderSongs(filtered);
+            }
         }
 
-        // 🎙️ नया फुलप्रूफ वॉयस सर्च इंजन (लाइव विजुअल बॉक्स के साथ)
+        // 🎙️ गिटहब पेजों के लिए पूरी तरह से री-राइट किया गया वॉयस सर्च
         let recognition;
         function startVoiceSearch() {
+            // पुराने प्रॉम्ट्स को साफ़ करना
+            stopVoiceSearchManual();
+
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            
             if (!SpeechRecognition) {
-                alert("आपका मोबाइल या ब्राउज़र बोलना सपोर्ट नहीं करता। कृपया Google Chrome ऐप का उपयोग करें।");
+                alert("यह ब्राउज़र वॉयस सर्च सपोर्ट नहीं करता। कृपया Chrome ऐप का उपयोग करें।");
                 return;
             }
 
@@ -332,30 +353,31 @@
             const voiceStatusText = document.getElementById('voiceStatusText');
             const searchInput = document.getElementById('searchInput');
 
-            recognition.lang = 'hi-IN'; // हिंदी + हिंग्लिश मिक्स इनपुट पकड़ने के लिए बेस्ट
+            recognition.lang = 'hi-IN';
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
 
+            // गिटहब की पॉलिसी को बाईपास करने के लिए यूजर क्लिक के तुरंत बाद इंटरफ़ेस दिखाना
+            voiceOverlay.style.display = 'flex';
+            micBtn.classList.add('listening');
+            searchBoxBlock.classList.add('listening-mode');
+            voiceStatusText.innerText = "सुन रहा हूँ... भजन का नाम बोलें";
+
             recognition.onstart = () => {
-                micBtn.classList.add('listening');
-                searchBoxBlock.classList.add('listening-mode');
-                voiceOverlay.style.display = 'flex'; // पूरी स्क्रीन पर वॉइस बॉक्स दिखाओ
-                voiceStatusText.innerText = "साफ और ऊंचे स्वर में बोलिए...";
+                console.log("माइक एक्टिवेटेड");
             };
 
             recognition.onerror = (event) => {
-                console.error("माइक एरर:", event.error);
+                console.error("माइक की समस्या:", event.error);
                 if (event.error === 'not-allowed') {
-                    voiceStatusText.innerHTML = "<span style='color:#ef4444;'>परमिशन ब्लॉक है!</span><br>कृपया ऊपर 🔒 (लॉक) आइकॉन पर क्लिक करके माइक Allow करें।";
-                    setTimeout(stopVoiceSearchManual, 4000);
+                    voiceStatusText.innerHTML = "<span style='color:#ef4444; font-weight:bold;'>परमिशन ब्लॉक है!</span><br><br>कृपया अपने मोबाइल की सेटिंग्स में जाकर Chrome ऐप को Microphone की अनुमति दें, या ऊपर बने 🔒 लॉक आइकॉन पर क्लिक करें।";
                 } else {
-                    voiceStatusText.innerText = "आवाज समझ नहीं आई, दोबारा कोशिश करें।";
-                    setTimeout(stopVoiceSearchManual, 2000);
+                    voiceStatusText.innerText = "आवाज साफ़ नहीं थी, कृपया दोबारा बटन दबाकर बोलें।";
+                    setTimeout(stopVoiceSearchManual, 2500);
                 }
             };
 
             recognition.onend = () => {
-                // ऑटोमैटिक बंद होने पर केवल यूआई रीसेट करें
                 micBtn.classList.remove('listening');
                 searchBoxBlock.classList.remove('listening-mode');
             };
@@ -363,21 +385,22 @@
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
                 searchInput.value = transcript;
-                filterSongs(); // तुरंत सर्च ट्रिगर करें
-                voiceStatusText.innerText = "मिल गया: " + transcript;
-                setTimeout(stopVoiceSearchManual, 1000); // 1 सेकंड में बॉक्स बंद करें
+                filterSongs(); // तुरंत सर्च शुरू करें
+                voiceStatusText.innerText = "सर्च हो रहा है: " + transcript;
+                setTimeout(stopVoiceSearchManual, 800);
             };
 
             try {
                 recognition.start();
             } catch(e) {
-                console.error(e);
+                console.error("क्रैश बाईपास:", e);
+                stopVoiceSearchManual();
             }
         }
 
         function stopVoiceSearchManual() {
             if (recognition) {
-                try { recognition.stop(); } catch(e) {}
+                try { recognition.abort(); } catch(e) {}
             }
             document.getElementById('micBtn').classList.remove('listening');
             document.getElementById('searchBoxBlock').classList.remove('listening-mode');
